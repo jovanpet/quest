@@ -6,25 +6,25 @@ An interactive CLI tool for learning Go through hands-on coding quests with AI-p
 
 ```bash
 # Start a new quest
-./quest begin
+quest begin
 
 # Get your next task
-./quest next
+quest next
 
 # Check if your code passes
-./quest check
+quest check
 
 # Need help? Get AI explanations
-./quest explain
+quest explain
 
 # Mark current task as complete
-./quest complete
+quest complete
 
 # View your progress
-./quest summary
+quest summary
 
 #Check the health of the quest
-./quest health
+quest health
 ```
 
 ## Commands
@@ -109,6 +109,10 @@ cd quest
 go build -o quest
 
 # Run it
+./quest begin
+
+```bash
+# To run in the repo itself, use ./ before quest to run the executable
 ./quest begin
 ```
 
