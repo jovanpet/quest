@@ -38,8 +38,8 @@ Move to the next task in your quest and display what you need to work on.
 ### `quest check`
 Validate that you have completed the requirements for the current task. Shows what passed and what failed.
 
-Options:
-- `-a, --annotate` - Add inline comments to code showing check results
+Options (Recommended To Use):
+- `-a, --annotate` - Generate AI inline comments to code checking in depth check of the code.
 
 ### `quest explain`
 Get AI-powered explanations and hints for the current task. The AI analyzes your code and provides contextual guidance, with increasing detail based on how many times you've requested help.
