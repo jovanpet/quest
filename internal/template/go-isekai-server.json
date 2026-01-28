@@ -1,0 +1,820 @@
+{
+  "version": 1,
+  "journey": {
+    "name": "Isekai World Server Manager",
+    "description": "Build a distributed management system for parallel fantasy worlds",
+    "language": "go",
+    "focus": ["distributed-systems", "websockets", "state-sync", "load-balancing", "real-time"]
+  },
+  "chapters": [
+    {
+      "id": "chapter-1",
+      "title": "World Foundations",
+      "quests": [
+        {
+          "id": "quest-1-1",
+          "title": "World Server Core",
+          "tasks": [
+            {
+              "id": "task-1-1-1",
+              "title": "Define world structure",
+              "objective": "Create the core world data model",
+              "steps": [
+                "Create World struct with ID, name, dimension, capacity, active players",
+                "Add WorldConfig for world rules (PVP, difficulty, time scale)",
+                "Implement world state enum (initializing, active, paused, closing)"
+              ],
+              "artifacts": ["world/types.go", "world/config.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "glob_count_min",
+                    "name": "World files exist",
+                    "glob": "world/*.go",
+                    "min": 2
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has World struct",
+                    "glob": "world/*.go",
+                    "any": ["type World struct", "World {"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-1-1-2",
+              "title": "Server process",
+              "objective": "Create isolated server process for each world",
+              "steps": [
+                "Create WorldServer struct with world data and connection pool",
+                "Implement Start() and Shutdown() methods",
+                "Add health check system",
+                "Use context for graceful shutdown"
+              ],
+              "artifacts": ["server/world_server.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "World server exists",
+                    "path": "server/world_server.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses context",
+                    "glob": "server/*.go",
+                    "any": ["context.Context", "context."]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-1-1-3",
+              "title": "Player registry",
+              "objective": "Track players across worlds",
+              "steps": [
+                "Create Player struct with ID, username, currentWorld, stats",
+                "Implement thread-safe PlayerRegistry with sync.RWMutex",
+                "Add methods: Register, GetPlayer, UpdateLocation"
+              ],
+              "artifacts": ["player/registry.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Player registry exists",
+                    "path": "player/registry.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses RWMutex",
+                    "glob": "player/*.go",
+                    "any": ["sync.RWMutex", "RWMutex"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-1-2",
+          "title": "Communication Layer",
+          "tasks": [
+            {
+              "id": "task-1-2-1",
+              "title": "WebSocket setup",
+              "objective": "Enable real-time player connections",
+              "steps": [
+                "Install gorilla/websocket library",
+                "Create WebSocket handler for player connections",
+                "Implement connection upgrade from HTTP"
+              ],
+              "artifacts": ["ws/handler.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "WebSocket handler exists",
+                    "path": "ws/handler.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses websocket",
+                    "glob": "ws/*.go",
+                    "any": ["websocket.", "gorilla/websocket"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-1-2-2",
+              "title": "Message protocol",
+              "objective": "Define inter-world communication protocol",
+              "steps": [
+                "Create Message struct with type, payload, worldID, timestamp",
+                "Define message types (PlayerJoin, PlayerLeave, StateSync, WorldEvent)",
+                "Implement JSON serialization/deserialization"
+              ],
+              "artifacts": ["protocol/messages.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Message protocol exists",
+                    "path": "protocol/messages.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has message types",
+                    "glob": "protocol/*.go",
+                    "any": ["MessageType", "const ("]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-1-2-3",
+              "title": "Connection manager",
+              "objective": "Manage player WebSocket connections per world",
+              "steps": [
+                "Create ConnectionManager with map of player connections",
+                "Implement Broadcast() to send to all players in world",
+                "Add SendToPlayer() for targeted messages",
+                "Handle connection drops and reconnection"
+              ],
+              "artifacts": ["ws/manager.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Connection manager exists",
+                    "path": "ws/manager.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has broadcast function",
+                    "glob": "ws/*.go",
+                    "any": ["Broadcast", "broadcast"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-2",
+      "title": "Manager Orchestration",
+      "quests": [
+        {
+          "id": "quest-2-1",
+          "title": "World Manager Service",
+          "tasks": [
+            {
+              "id": "task-2-1-1",
+              "title": "Manager core",
+              "objective": "Create central world manager",
+              "steps": [
+                "Create WorldManager struct managing multiple WorldServers",
+                "Implement CreateWorld, DestroyWorld, GetWorld methods",
+                "Track active worlds in thread-safe map"
+              ],
+              "artifacts": ["manager/world_manager.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "World manager exists",
+                    "path": "manager/world_manager.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has world management",
+                    "glob": "manager/*.go",
+                    "any": ["CreateWorld", "DestroyWorld"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-2-1-2",
+              "title": "Load balancer",
+              "objective": "Distribute players across worlds",
+              "steps": [
+                "Create LoadBalancer with multiple strategies",
+                "Implement RoundRobin strategy",
+                "Implement LeastConnections strategy",
+                "Add GetBestWorld() method"
+              ],
+              "artifacts": ["manager/load_balancer.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Load balancer exists",
+                    "path": "manager/load_balancer.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has balancing strategies",
+                    "glob": "manager/*.go",
+                    "any": ["RoundRobin", "LeastConnections"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-2-1-3",
+              "title": "Auto-scaling",
+              "objective": "Automatically create/destroy worlds based on load",
+              "steps": [
+                "Create Scaler component with scaling policies",
+                "Monitor world capacity metrics",
+                "Auto-create world when all worlds > 80% capacity",
+                "Auto-destroy world when idle for 5 minutes"
+              ],
+              "artifacts": ["manager/scaler.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Scaler exists",
+                    "path": "manager/scaler.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has scaling logic",
+                    "glob": "manager/*.go",
+                    "any": ["scale", "Scale", "capacity"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-2-2",
+          "title": "State Synchronization",
+          "tasks": [
+            {
+              "id": "task-2-2-1",
+              "title": "State store",
+              "objective": "Persist world state",
+              "steps": [
+                "Create StateStore interface (Get, Set, Delete)",
+                "Implement InMemoryStore with sync.Map",
+                "Add TTL support for temporary state"
+              ],
+              "artifacts": ["state/store.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "State store exists",
+                    "path": "state/store.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has store interface",
+                    "glob": "state/*.go",
+                    "any": ["StateStore", "interface"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-2-2-2",
+              "title": "State synchronization",
+              "objective": "Sync state changes across worlds",
+              "steps": [
+                "Create StateSyncer with pub/sub pattern",
+                "Implement Subscribe and Publish methods",
+                "Use channels for async state propagation",
+                "Handle state conflicts with last-write-wins"
+              ],
+              "artifacts": ["state/syncer.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "State syncer exists",
+                    "path": "state/syncer.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses pub/sub",
+                    "glob": "state/*.go",
+                    "any": ["Subscribe", "Publish", "chan"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-2-2-3",
+              "title": "State snapshots",
+              "objective": "Create periodic world snapshots",
+              "steps": [
+                "Create Snapshot struct with world state and timestamp",
+                "Implement CreateSnapshot() method",
+                "Add RestoreSnapshot() for world recovery",
+                "Schedule snapshots every 30 seconds"
+              ],
+              "artifacts": ["state/snapshot.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Snapshot system exists",
+                    "path": "state/snapshot.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has snapshot methods",
+                    "glob": "state/*.go",
+                    "any": ["Snapshot", "CreateSnapshot", "RestoreSnapshot"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-2-3",
+          "title": "Portal System",
+          "tasks": [
+            {
+              "id": "task-2-3-1",
+              "title": "Cross-world portals",
+              "objective": "Allow players to travel between worlds",
+              "steps": [
+                "Create Portal struct with source/target world IDs",
+                "Implement TransferPlayer() method",
+                "Handle connection migration to new WorldServer",
+                "Notify both worlds of player transfer"
+              ],
+              "artifacts": ["portal/transfer.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Portal system exists",
+                    "path": "portal/transfer.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has transfer logic",
+                    "glob": "portal/*.go",
+                    "any": ["Transfer", "portal"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-2-3-2",
+              "title": "Transfer validation",
+              "objective": "Validate world transfers",
+              "steps": [
+                "Check target world has capacity",
+                "Verify player meets requirements (level, items)",
+                "Implement cooldown system (1 transfer per minute)",
+                "Return error on validation failure"
+              ],
+              "artifacts": ["portal/validator.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Validator exists",
+                    "path": "portal/validator.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has validation",
+                    "glob": "portal/*.go",
+                    "any": ["Validate", "validation", "error"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-3",
+      "title": "Management API",
+      "quests": [
+        {
+          "id": "quest-3-1",
+          "title": "REST API",
+          "tasks": [
+            {
+              "id": "task-3-1-1",
+              "title": "API server",
+              "objective": "Create management REST API",
+              "steps": [
+                "Set up HTTP server with chi router",
+                "Add middleware (logging, CORS, auth)",
+                "Implement health check endpoint"
+              ],
+              "artifacts": ["api/server.go", "api/middleware.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "glob_count_min",
+                    "name": "API files exist",
+                    "glob": "api/*.go",
+                    "min": 2
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses HTTP server",
+                    "glob": "api/*.go",
+                    "any": ["http.Server", "ListenAndServe"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-3-1-2",
+              "title": "World endpoints",
+              "objective": "Add world management endpoints",
+              "steps": [
+                "POST /worlds - create new world",
+                "GET /worlds - list all worlds",
+                "GET /worlds/{id} - get world details",
+                "DELETE /worlds/{id} - destroy world"
+              ],
+              "artifacts": ["api/worlds.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "World handlers exist",
+                    "path": "api/worlds.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has CRUD operations",
+                    "glob": "api/*.go",
+                    "any": ["POST", "GET", "DELETE"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-3-1-3",
+              "title": "Player endpoints",
+              "objective": "Add player management endpoints",
+              "steps": [
+                "GET /players - list all players",
+                "GET /players/{id} - get player details",
+                "POST /players/{id}/transfer - trigger world transfer",
+                "GET /worlds/{id}/players - list players in world"
+              ],
+              "artifacts": ["api/players.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Player handlers exist",
+                    "path": "api/players.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has player operations",
+                    "glob": "api/*.go",
+                    "any": ["players", "transfer"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-3-2",
+          "title": "Monitoring & Metrics",
+          "tasks": [
+            {
+              "id": "task-3-2-1",
+              "title": "Metrics collection",
+              "objective": "Track system performance",
+              "steps": [
+                "Install prometheus client library",
+                "Add metrics: world_count, player_count, transfer_rate",
+                "Track WebSocket connection count per world",
+                "Expose /metrics endpoint"
+              ],
+              "artifacts": ["metrics/collector.go", "metrics/prometheus.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "glob_count_min",
+                    "name": "Metrics files exist",
+                    "glob": "metrics/*.go",
+                    "min": 2
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses prometheus",
+                    "glob": "metrics/*.go",
+                    "any": ["prometheus", "Gauge", "Counter"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-3-2-2",
+              "title": "Structured logging",
+              "objective": "Add comprehensive logging",
+              "steps": [
+                "Use zap logger library",
+                "Log world lifecycle events",
+                "Log player transfers with context",
+                "Add correlation IDs for request tracing"
+              ],
+              "artifacts": ["logging/logger.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Logger exists",
+                    "path": "logging/logger.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses structured logging",
+                    "glob": "logging/*.go",
+                    "any": ["zap.", "Logger"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-3-2-3",
+              "title": "Dashboard data",
+              "objective": "Provide real-time dashboard data",
+              "steps": [
+                "Create GET /dashboard endpoint",
+                "Return aggregated stats (total players, worlds, transfers)",
+                "Include per-world breakdown",
+                "Add WebSocket endpoint for live updates"
+              ],
+              "artifacts": ["api/dashboard.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Dashboard handler exists",
+                    "path": "api/dashboard.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has dashboard logic",
+                    "glob": "api/*.go",
+                    "any": ["dashboard", "Dashboard"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-4",
+      "title": "Advanced Features",
+      "quests": [
+        {
+          "id": "quest-4-1",
+          "title": "Distributed Coordination",
+          "tasks": [
+            {
+              "id": "task-4-1-1",
+              "title": "Leader election",
+              "objective": "Elect leader manager for coordination",
+              "steps": [
+                "Implement Raft consensus or use etcd",
+                "Add leader election logic",
+                "Handle leader failover",
+                "Redirect non-leaders to current leader"
+              ],
+              "artifacts": ["cluster/election.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Election logic exists",
+                    "path": "cluster/election.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has leader election",
+                    "glob": "cluster/*.go",
+                    "any": ["leader", "election", "consensus"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-4-1-2",
+              "title": "Distributed locking",
+              "objective": "Prevent race conditions across managers",
+              "steps": [
+                "Implement distributed lock interface",
+                "Use Redis or etcd for coordination",
+                "Add Lock() and Unlock() with timeouts",
+                "Handle lock expiration"
+              ],
+              "artifacts": ["cluster/locks.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Lock system exists",
+                    "path": "cluster/locks.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has locking",
+                    "glob": "cluster/*.go",
+                    "any": ["Lock", "Unlock", "distributed"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-4-2",
+          "title": "Event System",
+          "tasks": [
+            {
+              "id": "task-4-2-1",
+              "title": "Event bus",
+              "objective": "Create system-wide event bus",
+              "steps": [
+                "Create EventBus with topic subscriptions",
+                "Implement Publish/Subscribe pattern",
+                "Support multiple subscribers per topic",
+                "Add event filtering by type"
+              ],
+              "artifacts": ["events/bus.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Event bus exists",
+                    "path": "events/bus.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has pub/sub",
+                    "glob": "events/*.go",
+                    "any": ["Publish", "Subscribe", "EventBus"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-4-2-2",
+              "title": "Event handlers",
+              "objective": "React to system events",
+              "steps": [
+                "Create handlers for WorldCreated, WorldDestroyed",
+                "Handle PlayerJoined, PlayerLeft events",
+                "Trigger webhooks on important events",
+                "Log all events for audit trail"
+              ],
+              "artifacts": ["events/handlers.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Event handlers exist",
+                    "path": "events/handlers.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has handlers",
+                    "glob": "events/*.go",
+                    "any": ["Handler", "handle"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-4-3",
+          "title": "Resilience & Testing",
+          "tasks": [
+            {
+              "id": "task-4-3-1",
+              "title": "Circuit breaker",
+              "objective": "Prevent cascade failures",
+              "steps": [
+                "Implement circuit breaker pattern",
+                "Track failure rates per world",
+                "Open circuit after 5 consecutive failures",
+                "Auto-recover after cooldown period"
+              ],
+              "artifacts": ["resilience/circuit_breaker.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Circuit breaker exists",
+                    "path": "resilience/circuit_breaker.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has circuit breaker",
+                    "glob": "resilience/*.go",
+                    "any": ["CircuitBreaker", "circuit"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-4-3-2",
+              "title": "Integration tests",
+              "objective": "Test end-to-end flows",
+              "steps": [
+                "Write test for world creation and player join",
+                "Test player transfer between worlds",
+                "Test auto-scaling triggers",
+                "Test state synchronization"
+              ],
+              "artifacts": ["integration_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Integration tests exist",
+                    "path": "integration_test.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has test functions",
+                    "glob": "*_test.go",
+                    "any": ["func Test", "testing.T"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-4-3-3",
+              "title": "Load testing",
+              "objective": "Verify system handles load",
+              "steps": [
+                "Create load test with 1000 concurrent players",
+                "Test world transfer under load",
+                "Measure response times and throughput",
+                "Verify no memory leaks"
+              ],
+              "artifacts": ["load_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Load tests exist",
+                    "path": "load_test.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has benchmark",
+                    "glob": "*_test.go",
+                    "any": ["Benchmark", "testing.B"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

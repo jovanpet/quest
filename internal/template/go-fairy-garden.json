@@ -1,0 +1,365 @@
+{
+  "version": 1,
+  "journey": {
+    "name": "Fairy Garden Automation System",
+    "description": "Build a magical flower potting service for enchanted gardens",
+    "language": "go",
+    "focus": ["workers", "queues", "scheduling", "state-management"]
+  },
+  "chapters": [
+    {
+      "id": "chapter-1",
+      "title": "Garden Foundation",
+      "quests": [
+        {
+          "id": "quest-1-1",
+          "title": "Flower Database",
+          "tasks": [
+            {
+              "id": "task-1-1-1",
+              "title": "Create flower types",
+              "objective": "Define flower species and their magical properties",
+              "steps": [
+                "Create a Flower struct with name, color, magicLevel, growthTime",
+                "Add flower species constants (Rose, Lily, Tulip, etc.)",
+                "Write function to validate flower properties"
+              ],
+              "artifacts": ["flowers/types.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Flower types file exists",
+                    "path": "flowers/types.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has Flower struct",
+                    "glob": "flowers/*.go",
+                    "any": ["type Flower struct", "Flower {"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-1-1-2",
+              "title": "Pot management",
+              "objective": "Create pot inventory system",
+              "steps": [
+                "Create Pot struct with size, material, enchantment level",
+                "Implement pot availability checking",
+                "Add pot allocation logic"
+              ],
+              "artifacts": ["pots/inventory.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Pot inventory exists",
+                    "path": "pots/inventory.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has Pot struct",
+                    "glob": "pots/*.go",
+                    "any": ["type Pot struct", "Pot {"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-1-2",
+          "title": "Worker Fairy System",
+          "tasks": [
+            {
+              "id": "task-1-2-1",
+              "title": "Fairy worker definition",
+              "objective": "Create fairy worker that can pot flowers",
+              "steps": [
+                "Create FairyWorker struct with ID, name, skillLevel",
+                "Add PotFlower method that takes flower and pot",
+                "Implement worker state tracking (busy/available)"
+              ],
+              "artifacts": ["workers/fairy.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Fairy worker file exists",
+                    "path": "workers/fairy.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has FairyWorker",
+                    "glob": "workers/*.go",
+                    "any": ["type FairyWorker", "FairyWorker struct"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-1-2-2",
+              "title": "Concurrent worker pool",
+              "objective": "Create pool of fairy workers using goroutines",
+              "steps": [
+                "Create WorkerPool struct with slice of FairyWorkers",
+                "Implement Start() method that launches goroutines",
+                "Add channel for distributing work",
+                "Handle graceful shutdown"
+              ],
+              "artifacts": ["workers/pool.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Worker pool exists",
+                    "path": "workers/pool.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses goroutines",
+                    "glob": "workers/*.go",
+                    "any": ["go ", "goroutine"]
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses channels",
+                    "glob": "workers/*.go",
+                    "any": ["chan ", "make(chan"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-2",
+      "title": "Potting Service",
+      "quests": [
+        {
+          "id": "quest-2-1",
+          "title": "Job Queue",
+          "tasks": [
+            {
+              "id": "task-2-1-1",
+              "title": "Create potting job",
+              "objective": "Define potting job structure and queue",
+              "steps": [
+                "Create PottingJob struct with flower, pot, priority",
+                "Implement JobQueue using channel",
+                "Add job submission function"
+              ],
+              "artifacts": ["queue/jobs.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Jobs file exists",
+                    "path": "queue/jobs.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has job queue",
+                    "glob": "queue/*.go",
+                    "any": ["JobQueue", "chan"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-2-1-2",
+              "title": "Priority scheduling",
+              "objective": "Implement priority-based job scheduling",
+              "steps": [
+                "Create priority queue using heap",
+                "Sort jobs by urgency and magic level",
+                "Ensure high-priority flowers are potted first"
+              ],
+              "artifacts": ["queue/priority.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Priority queue exists",
+                    "path": "queue/priority.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses heap",
+                    "glob": "queue/*.go",
+                    "any": ["heap.", "container/heap"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-2-2",
+          "title": "Garden API",
+          "tasks": [
+            {
+              "id": "task-2-2-1",
+              "title": "HTTP server setup",
+              "objective": "Create REST API for garden management",
+              "steps": [
+                "Set up HTTP server on port 8080",
+                "Add POST /pot endpoint for job submission",
+                "Add GET /status endpoint for worker status"
+              ],
+              "artifacts": ["main.go", "api/handlers.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Main file exists",
+                    "path": "main.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has HTTP server",
+                    "glob": "*.go",
+                    "any": ["http.ListenAndServe", "ListenAndServe"]
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has handlers",
+                    "glob": "api/*.go",
+                    "any": ["http.HandleFunc", "HandleFunc"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-2-2-2",
+              "title": "Job status tracking",
+              "objective": "Track and report potting job status",
+              "steps": [
+                "Add JobStatus enum (pending, in-progress, completed, failed)",
+                "Implement status updates in worker",
+                "Create GET /jobs/{id} endpoint"
+              ],
+              "artifacts": ["api/status.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Status handler exists",
+                    "path": "api/status.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has status tracking",
+                    "glob": "api/*.go",
+                    "any": ["JobStatus", "status"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chapter-3",
+      "title": "Magic & Monitoring",
+      "quests": [
+        {
+          "id": "quest-3-1",
+          "title": "Enchantment System",
+          "tasks": [
+            {
+              "id": "task-3-1-1",
+              "title": "Apply magic to pots",
+              "objective": "Add enchantment logic during potting",
+              "steps": [
+                "Create Enchantment interface",
+                "Implement GrowthBoost, ColorEnhance spells",
+                "Apply enchantments based on flower type"
+              ],
+              "artifacts": ["magic/enchantments.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Enchantments exist",
+                    "path": "magic/enchantments.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Has enchantment interface",
+                    "glob": "magic/*.go",
+                    "any": ["interface", "Enchantment"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "quest-3-2",
+          "title": "Monitoring Dashboard",
+          "tasks": [
+            {
+              "id": "task-3-2-1",
+              "title": "Metrics collection",
+              "objective": "Track fairy worker performance",
+              "steps": [
+                "Add metrics for jobs completed, avg time, errors",
+                "Implement metrics endpoint GET /metrics",
+                "Use sync.Mutex for thread-safe counters"
+              ],
+              "artifacts": ["metrics/collector.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "exists",
+                    "name": "Metrics collector exists",
+                    "path": "metrics/collector.go"
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses mutex",
+                    "glob": "metrics/*.go",
+                    "any": ["sync.Mutex", "Mutex"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "task-3-2-2",
+              "title": "Write tests",
+              "objective": "Test worker pool and queue",
+              "steps": [
+                "Write test for worker pool creation",
+                "Test job queue operations",
+                "Test concurrent potting"
+              ],
+              "artifacts": ["workers/pool_test.go", "queue/jobs_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "type": "glob_count_min",
+                    "name": "Has test files",
+                    "glob": "*_test.go",
+                    "min": 2
+                  },
+                  {
+                    "type": "file_contains_any",
+                    "name": "Uses testing package",
+                    "glob": "*_test.go",
+                    "any": ["func Test", "testing.T"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

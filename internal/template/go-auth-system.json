@@ -1,0 +1,702 @@
+{
+  "version": 1,
+  "journey": {
+    "name": "Build User Authentication System",
+    "description": "Learn secure user authentication with database, sessions, and JWT",
+    "language": "go",
+    "focus": ["database", "authentication", "security", "api"]
+  },
+  "chapters": [
+    {
+      "id": "database-setup",
+      "title": "Database Foundation",
+      "quests": [
+        {
+          "id": "connect-db",
+          "title": "Database Connection",
+          "tasks": [
+            {
+              "id": "install-driver",
+              "title": "Install database driver",
+              "objective": "Set up PostgreSQL driver and create database connection",
+              "steps": [
+                "Run 'go get github.com/lib/pq' to install PostgreSQL driver",
+                "Create db/connection.go file",
+                "Write a Connect() function that returns *sql.DB",
+                "Use connection string: postgres://user:pass@localhost/dbname?sslmode=disable",
+                "Test connection with db.Ping()"
+              ],
+              "files": ["db/connection.go"],
+              "artifacts": ["db/connection.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Database file exists",
+                    "type": "exists",
+                    "path": "db/connection.go"
+                  },
+                  {
+                    "name": "Imports database/sql",
+                    "type": "file_contains_any",
+                    "glob": "db/connection.go",
+                    "any": ["database/sql", "sql.DB"]
+                  },
+                  {
+                    "name": "Uses PostgreSQL driver",
+                    "type": "file_contains_any",
+                    "glob": "db/connection.go",
+                    "any": ["github.com/lib/pq", "pq"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "connection-pool",
+              "title": "Configure connection pool",
+              "objective": "Set up proper connection pooling for production use",
+              "steps": [
+                "Call db.SetMaxOpenConns(25) to limit concurrent connections",
+                "Call db.SetMaxIdleConns(5) for idle connection pool",
+                "Call db.SetConnMaxLifetime(5 * time.Minute) for connection recycling",
+                "Add error handling for connection failures"
+              ],
+              "artifacts": ["db/connection.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Configures max connections",
+                    "type": "file_contains_any",
+                    "glob": "db/connection.go",
+                    "any": ["SetMaxOpenConns", "SetMaxIdleConns"]
+                  },
+                  {
+                    "name": "Sets connection lifetime",
+                    "type": "file_contains_any",
+                    "glob": "db/connection.go",
+                    "any": ["SetConnMaxLifetime", "ConnMaxLifetime"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "test-connection",
+              "title": "Test database connection",
+              "objective": "Write tests to verify database connectivity",
+              "files": ["db/connection_test.go"],
+              "artifacts": ["db/connection_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Has test file",
+                    "type": "exists",
+                    "path": "db/connection_test.go"
+                  },
+                  {
+                    "name": "Uses testing package",
+                    "type": "file_contains_any",
+                    "glob": "db/*_test.go",
+                    "any": ["func Test", "testing.T"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "user-model",
+          "title": "User Model & Schema",
+          "tasks": [
+            {
+              "id": "define-user-struct",
+              "title": "Define User struct",
+              "objective": "Create a User model with proper fields and validation",
+              "steps": [
+                "Create models/user.go",
+                "Define User struct with ID, Email, Password, CreatedAt fields",
+                "Add json tags for API serialization",
+                "Add db tags for database mapping"
+              ],
+              "files": ["models/user.go"],
+              "artifacts": ["models/user.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "User model exists",
+                    "type": "exists",
+                    "path": "models/user.go"
+                  },
+                  {
+                    "name": "Defines User struct",
+                    "type": "file_contains_any",
+                    "glob": "models/user.go",
+                    "any": ["type User struct", "struct User"]
+                  },
+                  {
+                    "name": "Has JSON tags",
+                    "type": "file_contains_any",
+                    "glob": "models/user.go",
+                    "any": ["json:", "`json"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "create-migration",
+              "title": "Create database migration",
+              "objective": "Write SQL migration to create users table",
+              "steps": [
+                "Create migrations/001_create_users.sql",
+                "Write CREATE TABLE users with id, email, password, created_at columns",
+                "Set id as PRIMARY KEY with SERIAL",
+                "Add UNIQUE constraint on email",
+                "Add NOT NULL constraints where appropriate"
+              ],
+              "files": ["migrations/001_create_users.sql"],
+              "artifacts": ["migrations/*.sql"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Has migration files",
+                    "type": "glob_count_min",
+                    "glob": "migrations/*.sql",
+                    "min": 1
+                  },
+                  {
+                    "name": "Creates users table",
+                    "type": "file_contains_any",
+                    "glob": "migrations/*.sql",
+                    "any": ["CREATE TABLE users", "CREATE TABLE IF NOT EXISTS users"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "run-migration",
+              "title": "Implement migration runner",
+              "objective": "Create code to execute database migrations",
+              "steps": [
+                "Create db/migrate.go",
+                "Write Migrate() function that reads SQL files",
+                "Execute migrations in order using db.Exec()",
+                "Handle migration errors gracefully"
+              ],
+              "files": ["db/migrate.go"],
+              "artifacts": ["db/migrate.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Migration file exists",
+                    "type": "exists",
+                    "path": "db/migrate.go"
+                  },
+                  {
+                    "name": "Reads migration files",
+                    "type": "file_contains_any",
+                    "glob": "db/migrate.go",
+                    "any": ["os.ReadFile", "ioutil.ReadFile", "ReadDir"]
+                  },
+                  {
+                    "name": "Executes SQL",
+                    "type": "file_contains_any",
+                    "glob": "db/migrate.go",
+                    "any": ["db.Exec", "Exec("]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "authentication",
+      "title": "Authentication Logic",
+      "quests": [
+        {
+          "id": "user-registration",
+          "title": "User Registration",
+          "tasks": [
+            {
+              "id": "password-hashing",
+              "title": "Implement password hashing",
+              "objective": "Use bcrypt to securely hash passwords",
+              "steps": [
+                "Install bcrypt: go get golang.org/x/crypto/bcrypt",
+                "Create auth/password.go",
+                "Write HashPassword(password string) function using bcrypt.GenerateFromPassword",
+                "Write ComparePassword(hash, password string) function",
+                "Use bcrypt.DefaultCost for the cost parameter"
+              ],
+              "files": ["auth/password.go"],
+              "artifacts": ["auth/password.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Password file exists",
+                    "type": "exists",
+                    "path": "auth/password.go"
+                  },
+                  {
+                    "name": "Uses bcrypt",
+                    "type": "file_contains_any",
+                    "glob": "auth/password.go",
+                    "any": ["bcrypt.GenerateFromPassword", "bcrypt.CompareHashAndPassword"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "create-user",
+              "title": "Create user repository",
+              "objective": "Implement database operations for user management",
+              "steps": [
+                "Create repositories/user_repo.go",
+                "Define UserRepository struct with db *sql.DB field",
+                "Implement Create(user *User) method with INSERT query",
+                "Implement FindByEmail(email string) method with SELECT query",
+                "Hash password before inserting into database"
+              ],
+              "files": ["repositories/user_repo.go"],
+              "artifacts": ["repositories/user_repo.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Repository exists",
+                    "type": "exists",
+                    "path": "repositories/user_repo.go"
+                  },
+                  {
+                    "name": "Uses INSERT query",
+                    "type": "file_contains_any",
+                    "glob": "repositories/user_repo.go",
+                    "any": ["INSERT INTO", "INSERT"]
+                  },
+                  {
+                    "name": "Uses SELECT query",
+                    "type": "file_contains_any",
+                    "glob": "repositories/user_repo.go",
+                    "any": ["SELECT", "QueryRow"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "register-handler",
+              "title": "Create registration endpoint",
+              "objective": "Build POST /register endpoint to create new users",
+              "steps": [
+                "Create handlers/register.go",
+                "Implement RegisterHandler function",
+                "Parse JSON request body with email and password",
+                "Validate email format and password strength",
+                "Call userRepo.Create() and return success/error JSON"
+              ],
+              "files": ["handlers/register.go"],
+              "artifacts": ["handlers/register.go", "main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Register handler exists",
+                    "type": "exists",
+                    "path": "handlers/register.go"
+                  },
+                  {
+                    "name": "Handles JSON",
+                    "type": "file_contains_any",
+                    "glob": "handlers/register.go",
+                    "any": ["json.Decoder", "json.Unmarshal"]
+                  },
+                  {
+                    "name": "Returns JSON response",
+                    "type": "file_contains_any",
+                    "glob": "handlers/register.go",
+                    "any": ["json.Marshal", "json.NewEncoder"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "test-registration",
+              "title": "Test registration flow",
+              "objective": "Write integration tests for user registration",
+              "files": ["handlers/register_test.go"],
+              "artifacts": ["handlers/*_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Has test files",
+                    "type": "glob_count_min",
+                    "glob": "handlers/*_test.go",
+                    "min": 1
+                  },
+                  {
+                    "name": "Uses httptest",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*_test.go",
+                    "any": ["httptest.NewRecorder", "httptest.NewRequest"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "user-login",
+          "title": "User Login & Sessions",
+          "tasks": [
+            {
+              "id": "login-handler",
+              "title": "Create login endpoint",
+              "objective": "Build POST /login endpoint for user authentication",
+              "steps": [
+                "Create handlers/login.go",
+                "Parse email and password from JSON body",
+                "Call userRepo.FindByEmail() to get user",
+                "Use ComparePassword() to verify password",
+                "Return error for invalid credentials"
+              ],
+              "files": ["handlers/login.go"],
+              "artifacts": ["handlers/login.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Login handler exists",
+                    "type": "exists",
+                    "path": "handlers/login.go"
+                  },
+                  {
+                    "name": "Handles JSON",
+                    "type": "file_contains_any",
+                    "glob": "handlers/login.go",
+                    "any": ["json.Decoder", "json.Unmarshal"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "session-store",
+              "title": "Implement session storage",
+              "objective": "Create in-memory session store for user sessions",
+              "steps": [
+                "Create auth/session.go",
+                "Define SessionStore struct with map[string]*Session",
+                "Implement Create(), Get(), and Delete() methods",
+                "Use sync.RWMutex for thread-safe access",
+                "Generate random session IDs with crypto/rand"
+              ],
+              "files": ["auth/session.go"],
+              "artifacts": ["auth/session.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Session file exists",
+                    "type": "exists",
+                    "path": "auth/session.go"
+                  },
+                  {
+                    "name": "Uses mutex for safety",
+                    "type": "file_contains_any",
+                    "glob": "auth/session.go",
+                    "any": ["sync.RWMutex", "sync.Mutex", "RLock", "Lock()"]
+                  },
+                  {
+                    "name": "Generates random IDs",
+                    "type": "file_contains_any",
+                    "glob": "auth/session.go",
+                    "any": ["crypto/rand", "rand.Read"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "session-cookie",
+              "title": "Set session cookie",
+              "objective": "Store session ID in HTTP cookie after login",
+              "steps": [
+                "Update login handler to create session after successful auth",
+                "Use http.SetCookie() to send session ID to client",
+                "Set HttpOnly flag to true for security",
+                "Set appropriate expiration time",
+                "Return user info in JSON response"
+              ],
+              "artifacts": ["handlers/login.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Sets cookies",
+                    "type": "file_contains_any",
+                    "glob": "handlers/login.go",
+                    "any": ["http.Cookie", "SetCookie"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "logout-handler",
+              "title": "Create logout endpoint",
+              "objective": "Build POST /logout to end user session",
+              "steps": [
+                "Create handlers/logout.go",
+                "Read session ID from cookie",
+                "Delete session from session store",
+                "Clear cookie by setting MaxAge to -1",
+                "Return success message"
+              ],
+              "files": ["handlers/logout.go"],
+              "artifacts": ["handlers/logout.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Logout handler exists",
+                    "type": "exists",
+                    "path": "handlers/logout.go"
+                  },
+                  {
+                    "name": "Handles cookies",
+                    "type": "file_contains_any",
+                    "glob": "handlers/logout.go",
+                    "any": ["Cookie", "SetCookie"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "title": "API Security & Authorization",
+      "quests": [
+        {
+          "id": "protected-routes",
+          "title": "Protected Routes",
+          "tasks": [
+            {
+              "id": "auth-middleware",
+              "title": "Create authentication middleware",
+              "objective": "Build middleware to protect routes requiring login",
+              "steps": [
+                "Create middleware/auth.go",
+                "Write RequireAuth() function that returns http.Handler",
+                "Check for session cookie in request",
+                "Validate session exists in session store",
+                "Return 401 Unauthorized if not authenticated",
+                "Call next handler if authenticated"
+              ],
+              "files": ["middleware/auth.go"],
+              "artifacts": ["middleware/auth.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Middleware exists",
+                    "type": "exists",
+                    "path": "middleware/auth.go"
+                  },
+                  {
+                    "name": "Returns http.Handler",
+                    "type": "file_contains_any",
+                    "glob": "middleware/auth.go",
+                    "any": ["http.Handler", "http.HandlerFunc", "ServeHTTP"]
+                  },
+                  {
+                    "name": "Checks cookies",
+                    "type": "file_contains_any",
+                    "glob": "middleware/auth.go",
+                    "any": ["Cookie(", "r.Cookie"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "protected-endpoint",
+              "title": "Create protected endpoint",
+              "objective": "Build GET /profile endpoint that requires authentication",
+              "steps": [
+                "Create handlers/profile.go",
+                "Implement ProfileHandler that returns user data",
+                "Get user ID from session",
+                "Fetch user from database",
+                "Return user profile as JSON"
+              ],
+              "files": ["handlers/profile.go"],
+              "artifacts": ["handlers/profile.go", "main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Profile handler exists",
+                    "type": "exists",
+                    "path": "handlers/profile.go"
+                  },
+                  {
+                    "name": "Returns JSON",
+                    "type": "file_contains_any",
+                    "glob": "handlers/profile.go",
+                    "any": ["json.Marshal", "json.NewEncoder"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "apply-middleware",
+              "title": "Apply middleware to routes",
+              "objective": "Protect routes using the auth middleware",
+              "steps": [
+                "Update main.go routing",
+                "Wrap /profile route with RequireAuth middleware",
+                "Leave /register and /login as public routes",
+                "Test that /profile returns 401 without session"
+              ],
+              "artifacts": ["main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Uses middleware",
+                    "type": "file_contains_any",
+                    "glob": "main.go",
+                    "any": ["RequireAuth", "middleware"]
+                  },
+                  {
+                    "name": "Has profile route",
+                    "type": "file_contains_any",
+                    "glob": "main.go",
+                    "any": ["/profile", "profile"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "jwt-tokens",
+          "title": "JWT Tokens & Advanced Security",
+          "tasks": [
+            {
+              "id": "jwt-library",
+              "title": "Set up JWT library",
+              "objective": "Install and configure JWT for stateless authentication",
+              "steps": [
+                "Install JWT: go get github.com/golang-jwt/jwt/v5",
+                "Create auth/jwt.go",
+                "Define JWT secret key (use environment variable)",
+                "Write GenerateJWT(userID int) function",
+                "Set expiration time to 24 hours"
+              ],
+              "files": ["auth/jwt.go"],
+              "artifacts": ["auth/jwt.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "JWT file exists",
+                    "type": "exists",
+                    "path": "auth/jwt.go"
+                  },
+                  {
+                    "name": "Uses JWT library",
+                    "type": "file_contains_any",
+                    "glob": "auth/jwt.go",
+                    "any": ["jwt.NewWithClaims", "jwt.SignedString", "github.com/golang-jwt/jwt"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "jwt-middleware",
+              "title": "Create JWT middleware",
+              "objective": "Build middleware to validate JWT tokens",
+              "steps": [
+                "Add ValidateJWT() function to auth/jwt.go",
+                "Parse token from Authorization header",
+                "Verify token signature and expiration",
+                "Extract user ID from claims",
+                "Create middleware/jwt.go that uses ValidateJWT()"
+              ],
+              "files": ["middleware/jwt.go"],
+              "artifacts": ["middleware/jwt.go", "auth/jwt.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "JWT middleware exists",
+                    "type": "exists",
+                    "path": "middleware/jwt.go"
+                  },
+                  {
+                    "name": "Checks Authorization header",
+                    "type": "file_contains_any",
+                    "glob": "middleware/jwt.go",
+                    "any": ["Authorization", "Header.Get"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "rate-limiting",
+              "title": "Add rate limiting",
+              "objective": "Implement rate limiting to prevent abuse",
+              "steps": [
+                "Create middleware/ratelimit.go",
+                "Use golang.org/x/time/rate for rate limiter",
+                "Limit to 10 requests per second per IP",
+                "Return 429 Too Many Requests when limit exceeded",
+                "Apply to all routes"
+              ],
+              "files": ["middleware/ratelimit.go"],
+              "artifacts": ["middleware/ratelimit.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Rate limit file exists",
+                    "type": "exists",
+                    "path": "middleware/ratelimit.go"
+                  },
+                  {
+                    "name": "Uses rate limiter",
+                    "type": "file_contains_any",
+                    "glob": "middleware/ratelimit.go",
+                    "any": ["rate.NewLimiter", "rate.Limiter", "golang.org/x/time/rate"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "final-integration",
+              "title": "Integration test suite",
+              "objective": "Write comprehensive tests for the complete auth system",
+              "steps": [
+                "Create integration_test.go",
+                "Test full registration flow",
+                "Test login with correct/incorrect credentials",
+                "Test accessing protected routes with/without token",
+                "Test token expiration",
+                "Test rate limiting"
+              ],
+              "files": ["integration_test.go"],
+              "artifacts": ["integration_test.go", "*_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Has integration tests",
+                    "type": "exists",
+                    "path": "integration_test.go"
+                  },
+                  {
+                    "name": "Multiple test files",
+                    "type": "glob_count_min",
+                    "glob": "*_test.go",
+                    "min": 3
+                  },
+                  {
+                    "name": "Uses testing framework",
+                    "type": "file_contains_any",
+                    "glob": "*_test.go",
+                    "any": ["func Test", "testing.T"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

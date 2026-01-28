@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "journey": {
+    "name": "Build a REST API with Go",
+    "description": "Master backend development by building a production-ready REST API",
+    "language": "go",
+    "focus": ["http", "json", "testing"]
+  },
+  "chapters": [
+    {
+      "id": "basics",
+      "title": "HTTP Fundamentals",
+      "quests": [
+        {
+          "id": "simple-server",
+          "title": "Create Your First HTTP Server",
+          "tasks": [
+            {
+              "id": "hello-handler",
+              "title": "Create a Hello World endpoint",
+              "objective": "Build a basic HTTP handler that responds to GET requests",
+              "steps": [
+                "Open main.go",
+                "Create a handler function that writes 'Hello, World!' to the response",
+                "Register the handler with http.HandleFunc",
+                "Start the server with http.ListenAndServe on port 8080"
+              ],
+              "files": ["main.go"],
+              "artifacts": ["main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "File exists",
+                    "type": "exists",
+                    "path": "main.go"
+                  },
+                  {
+                    "name": "Contains HTTP server code",
+                    "type": "file_contains_any",
+                    "glob": "main.go",
+                    "any": ["http.HandleFunc", "http.ListenAndServe"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "json-response",
+              "title": "Return JSON data",
+              "objective": "Create an endpoint that returns structured JSON",
+              "steps": [
+                "Define a struct for your response data",
+                "Create a new handler function",
+                "Use json.Marshal or json.NewEncoder to encode the struct",
+                "Set Content-Type header to application/json",
+                "Register the handler and test it"
+              ],
+              "artifacts": ["main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Contains JSON encoding",
+                    "type": "file_contains_any",
+                    "glob": "main.go",
+                    "any": ["json.Marshal", "json.NewEncoder"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "testing",
+      "title": "Testing Your API",
+      "quests": [
+        {
+          "id": "write-tests",
+          "title": "Add HTTP Handler Tests",
+          "tasks": [
+            {
+              "id": "test-handler",
+              "title": "Write handler tests",
+              "objective": "Create tests using httptest to verify your endpoints work",
+              "files": ["main_test.go"],
+              "artifacts": ["main_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Has test files",
+                    "type": "glob_count_min",
+                    "glob": "*_test.go",
+                    "min": 1
+                  },
+                  {
+                    "name": "Uses httptest package",
+                    "type": "file_contains_any",
+                    "glob": "main_test.go",
+                    "any": ["httptest.NewRecorder", "httptest.NewRequest"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

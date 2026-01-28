@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "journey": {
+    "name": "Go Concurrency Patterns",
+    "description": "Master goroutines, channels, and concurrent programming patterns",
+    "language": "go",
+    "focus": ["goroutines", "channels", "concurrency"]
+  },
+  "chapters": [
+    {
+      "id": "goroutines",
+      "title": "Goroutines & Channels",
+      "quests": [
+        {
+          "id": "basic-concurrency",
+          "title": "Learn Concurrent Programming",
+          "tasks": [
+            {
+              "id": "goroutine-basics",
+              "title": "Launch concurrent goroutines",
+              "objective": "Create a program that runs multiple goroutines concurrently",
+              "steps": [
+                "Create a function that prints a message with a delay",
+                "Launch multiple goroutines using the 'go' keyword",
+                "Use time.Sleep in main to wait for goroutines to complete",
+                "Observe that messages print concurrently"
+              ],
+              "files": ["main.go"],
+              "artifacts": ["main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "File exists",
+                    "type": "exists",
+                    "path": "main.go"
+                  },
+                  {
+                    "name": "Launches goroutines",
+                    "type": "file_contains_any",
+                    "glob": "main.go",
+                    "any": ["go func", "go "]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "channel-comm",
+              "title": "Communicate with channels",
+              "objective": "Use channels to safely share data between goroutines",
+              "artifacts": ["main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Uses channels",
+                    "type": "file_contains_any",
+                    "glob": "main.go",
+                    "any": ["make(chan", "chan "]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patterns",
+      "title": "Concurrency Patterns",
+      "quests": [
+        {
+          "id": "worker-pool",
+          "title": "Build a Worker Pool",
+          "tasks": [
+            {
+              "id": "implement-pool",
+              "title": "Create a worker pool pattern",
+              "objective": "Implement a worker pool that processes jobs concurrently",
+              "files": ["worker.go"],
+              "artifacts": ["worker.go", "main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Has Go files",
+                    "type": "glob_count_min",
+                    "glob": "*.go",
+                    "min": 1
+                  },
+                  {
+                    "name": "Uses worker pool pattern",
+                    "type": "file_contains_any",
+                    "glob": "*.go",
+                    "any": ["sync.WaitGroup", "for range"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

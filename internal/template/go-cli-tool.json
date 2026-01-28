@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "journey": {
+    "name": "Build a CLI Tool with Go",
+    "description": "Create a powerful command-line tool with flags and file operations",
+    "language": "go",
+    "focus": ["cobra", "flags", "file-io"]
+  },
+  "chapters": [
+    {
+      "id": "setup",
+      "title": "CLI Basics",
+      "quests": [
+        {
+          "id": "cobra-init",
+          "title": "Set up Cobra CLI",
+          "tasks": [
+            {
+              "id": "install-cobra",
+              "title": "Initialize a Cobra application",
+              "objective": "Create a CLI with Cobra that has a root command",
+              "steps": [
+                "Run 'go get github.com/spf13/cobra' to install Cobra",
+                "Create main.go with a main() that calls cmd.Execute()",
+                "Create cmd/root.go with a rootCmd using cobra.Command",
+                "Add Execute() function that runs rootCmd.Execute()",
+                "Test by running 'go run main.go'"
+              ],
+              "files": ["main.go", "cmd/root.go"],
+              "artifacts": ["main.go", "cmd/root.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Main file exists",
+                    "type": "exists",
+                    "path": "main.go"
+                  },
+                  {
+                    "name": "Has command files",
+                    "type": "glob_count_min",
+                    "glob": "cmd/*.go",
+                    "min": 1
+                  },
+                  {
+                    "name": "Uses Cobra framework",
+                    "type": "file_contains_any",
+                    "glob": "cmd/*.go",
+                    "any": ["cobra.Command", "cmd.Execute"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "add-subcommand",
+              "title": "Add a subcommand with flags",
+              "objective": "Create a subcommand that accepts command-line flags",
+              "files": ["cmd/greet.go"],
+              "artifacts": ["cmd/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Has multiple commands",
+                    "type": "glob_count_min",
+                    "glob": "cmd/*.go",
+                    "min": 2
+                  },
+                  {
+                    "name": "Uses command flags",
+                    "type": "file_contains_any",
+                    "glob": "cmd/*.go",
+                    "any": ["Flags().String", "Flags().Bool", "Flags().Int"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "functionality",
+      "title": "Add Core Features",
+      "quests": [
+        {
+          "id": "file-processing",
+          "title": "Read and Process Files",
+          "tasks": [
+            {
+              "id": "read-file",
+              "title": "Read input from files",
+              "objective": "Add functionality to read and process file contents",
+              "artifacts": ["cmd/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Reads files",
+                    "type": "file_contains_any",
+                    "glob": "cmd/*.go",
+                    "any": ["os.ReadFile", "os.Open", "ioutil.ReadFile"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

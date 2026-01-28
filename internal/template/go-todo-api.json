@@ -1,0 +1,410 @@
+{
+  "version": 1,
+  "journey": {
+    "name": "Build a Complete Todo API",
+    "description": "Full-stack REST API with database, testing, and production features",
+    "language": "go",
+    "focus": ["rest-api", "database", "testing", "middleware", "validation"]
+  },
+  "chapters": [
+    {
+      "id": "foundation",
+      "title": "API Foundation",
+      "quests": [
+        {
+          "id": "basic-server",
+          "title": "HTTP Server Setup",
+          "tasks": [
+            {
+              "id": "create-server",
+              "title": "Create a basic HTTP server",
+              "objective": "Set up a Go HTTP server that listens on port 8080",
+              "files": ["main.go"],
+              "artifacts": ["main.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Main file exists",
+                    "type": "exists",
+                    "path": "main.go"
+                  },
+                  {
+                    "name": "Contains HTTP server code",
+                    "type": "file_contains_any",
+                    "glob": "main.go",
+                    "any": ["http.ListenAndServe", "ListenAndServe"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "router-setup",
+              "title": "Set up routing with gorilla/mux",
+              "objective": "Install and configure gorilla/mux router for better routing",
+              "artifacts": ["main.go", "go.mod"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Go module exists",
+                    "type": "exists",
+                    "path": "go.mod"
+                  },
+                  {
+                    "name": "Uses gorilla/mux router",
+                    "type": "file_contains_any",
+                    "glob": "main.go",
+                    "any": ["mux.NewRouter", "gorilla/mux"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "health-endpoint",
+              "title": "Add health check endpoint",
+              "objective": "Create a GET /health endpoint that returns JSON status",
+              "files": ["handlers/health.go"],
+              "artifacts": ["handlers/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Has health endpoint",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["/health", "health"]
+                  },
+                  {
+                    "name": "Returns JSON response",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["json.Marshal", "json.NewEncoder"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "data-models",
+          "title": "Data Models & Structure",
+          "tasks": [
+            {
+              "id": "todo-struct",
+              "title": "Define Todo data structure",
+              "objective": "Create a Todo struct with ID, Title, Completed, and CreatedAt fields",
+              "steps": [
+                "Open models/todo.go",
+                "Define a Todo struct with ID (string), Title (string), Completed (bool), and CreatedAt (time.Time)",
+                "Add json tags to each field for API serialization",
+                "Export the struct by capitalizing its name"
+              ],
+              "files": ["models/todo.go"],
+              "artifacts": ["models/todo.go", "models.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Defines Todo struct",
+                    "type": "file_contains_any",
+                    "glob": "*.go",
+                    "any": ["type Todo struct", "struct Todo"]
+                  },
+                  {
+                    "name": "Has JSON tags",
+                    "type": "file_contains_any",
+                    "glob": "*.go",
+                    "any": ["json:", "`json"]
+                  }
+                ]
+              }
+            },
+            {
+              "title": "Create in-memory data store",
+              "objective": "Implement a thread-safe in-memory store using sync.Mutex",
+              "files": ["store/memory.go"],
+              "artifacts": ["store/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Uses mutex for synchronization",
+                    "type": "file_contains_any",
+                    "glob": "store/*.go",
+                    "any": ["sync.Mutex", "sync.RWMutex"]
+                  },
+                  {
+                    "name": "Implements locking mechanism",
+                    "type": "file_contains_any",
+                    "glob": "store/*.go",
+                    "any": ["Lock()", "Unlock()"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crud-operations",
+      "title": "CRUD API Endpoints",
+      "quests": [
+        {
+          "id": "create-read",
+          "title": "Create and Read Operations",
+          "tasks": [
+            {
+              "id": "create-todo",
+              "title": "POST /todos - Create todo",
+              "objective": "Implement endpoint to create a new todo from JSON body",
+              "steps": [
+                "Create a handler function in handlers/create.go",
+                "Decode the JSON request body into a Todo struct",
+                "Generate a unique ID for the new todo",
+                "Save the todo to the store",
+                "Return the created todo as JSON with 201 status"
+              ],
+              "files": ["handlers/create.go"],
+              "artifacts": ["handlers/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Handles POST method",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["POST", "MethodPost"]
+                  },
+                  {
+                    "name": "Decodes JSON request",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["json.Decoder", "json.Unmarshal"]
+                  }
+                ]
+              }
+            },
+            {
+              "title": "GET /todos - List all todos",
+              "objective": "Implement endpoint to retrieve all todos as JSON array",
+              "files": ["handlers/list.go"],
+              "artifacts": ["handlers/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Handles GET method",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["GET", "MethodGet"]
+                  },
+                  {
+                    "name": "Returns JSON response",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["json.Marshal", "json.NewEncoder"]
+                  }
+                ]
+              }
+            },
+            {
+              "title": "GET /todos/{id} - Get single todo",
+              "objective": "Implement endpoint to retrieve a specific todo by ID",
+              "files": ["handlers/get.go"],
+              "artifacts": ["handlers/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Extracts URL parameters",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["mux.Vars", "Vars("]
+                  },
+                  {
+                    "name": "Handles not found errors",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["404", "NotFound", "StatusNotFound"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "update-delete",
+          "title": "Update and Delete Operations",
+          "tasks": [
+            {
+              "title": "PUT /todos/{id} - Update todo",
+              "objective": "Implement endpoint to update an existing todo",
+              "files": ["handlers/update.go"],
+              "artifacts": ["handlers/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Handles PUT method",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["PUT", "MethodPut"]
+                  }
+                ]
+              }
+            },
+            {
+              "title": "DELETE /todos/{id} - Delete todo",
+              "objective": "Implement endpoint to delete a todo by ID",
+              "files": ["handlers/delete.go"],
+              "artifacts": ["handlers/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Handles DELETE method",
+                    "type": "file_contains_any",
+                    "glob": "handlers/*.go",
+                    "any": ["DELETE", "MethodDelete"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "testing",
+      "title": "Testing & Quality",
+      "quests": [
+        {
+          "id": "unit-tests",
+          "title": "Write Comprehensive Tests",
+          "tasks": [
+            {
+              "id": "handler-tests",
+              "title": "Test HTTP handlers",
+              "objective": "Write tests for all CRUD endpoints using httptest",
+              "files": ["handlers/handlers_test.go"],
+              "artifacts": ["handlers/handlers_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Handler test file exists",
+                    "type": "exists",
+                    "path": "handlers/handlers_test.go"
+                  },
+                  {
+                    "name": "Uses httptest package",
+                    "type": "file_contains_any",
+                    "glob": "handlers/handlers_test.go",
+                    "any": ["httptest.NewRecorder", "httptest.NewRequest"]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "store-tests",
+              "title": "Test data store operations",
+              "objective": "Write unit tests for the in-memory store with concurrent access",
+              "files": ["store/memory_test.go"],
+              "artifacts": ["store/memory_test.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Store test file exists",
+                    "type": "exists",
+                    "path": "store/memory_test.go"
+                  },
+                  {
+                    "name": "Uses testing framework",
+                    "type": "file_contains_any",
+                    "glob": "store/memory_test.go",
+                    "any": ["t.Run", "testing.T"]
+                  },
+                  {
+                    "name": "Tests concurrent access",
+                    "type": "file_contains_any",
+                    "glob": "store/memory_test.go",
+                    "any": ["go func", "WaitGroup"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "advanced",
+      "title": "Advanced Features",
+      "quests": [
+        {
+          "id": "middleware",
+          "title": "Add Middleware",
+          "tasks": [
+            {
+              "title": "Add request logging middleware",
+              "objective": "Create middleware that logs all incoming requests",
+              "files": ["middleware/logging.go"],
+              "artifacts": ["middleware/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Implements logging functionality",
+                    "type": "file_contains_any",
+                    "glob": "middleware/*.go",
+                    "any": ["log.Printf", "log.Println", "logger"]
+                  },
+                  {
+                    "name": "Uses HTTP handler pattern",
+                    "type": "file_contains_any",
+                    "glob": "middleware/*.go",
+                    "any": ["http.Handler", "http.HandlerFunc"]
+                  }
+                ]
+              }
+            },
+            {
+              "title": "Add input validation",
+              "objective": "Validate todo creation/update requests reject empty titles",
+              "files": ["validation/validate.go"],
+              "artifacts": ["validation/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Returns bad request status",
+                    "type": "file_contains_any",
+                    "glob": "validation/*.go",
+                    "any": ["400", "BadRequest", "StatusBadRequest"]
+                  },
+                  {
+                    "name": "Validates input fields",
+                    "type": "file_contains_any",
+                    "glob": "validation/*.go",
+                    "any": ["len(", "strings.TrimSpace", "if "]
+                  }
+                ]
+              }
+            },
+            {
+              "title": "Improve error handling",
+              "objective": "Create consistent error responses with proper HTTP status codes",
+              "files": ["errors/errors.go"],
+              "artifacts": ["errors/*.go"],
+              "validation": {
+                "rules": [
+                  {
+                    "name": "Writes HTTP error responses",
+                    "type": "file_contains_any",
+                    "glob": "errors/*.go",
+                    "any": ["WriteHeader", "http.Error"]
+                  },
+                  {
+                    "name": "Handles server errors",
+                    "type": "file_contains_any",
+                    "glob": "errors/*.go",
+                    "any": ["500", "InternalServerError"]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
