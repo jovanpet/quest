@@ -22,6 +22,9 @@ An interactive CLI tool for learning Go through hands-on coding quests with AI-p
 
 # View your progress
 ./quest summary
+
+#Check the health of the quest
+./quest health
 ```
 
 ## Commands
@@ -52,6 +55,9 @@ Options:
 
 ### `quest summary`
 View your quest progress across all chapters and tasks.
+
+### `quest health`
+Checks the health of the quest.
 
 ## How It Works
 

@@ -1,6 +1,6 @@
 module github.com/jovanpet/quest
 
-go 1.22.0
+go 1.18.0
 
 require github.com/spf13/cobra v1.10.2
 

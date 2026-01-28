@@ -1,6 +1,3 @@
-/*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -11,13 +8,14 @@ import (
 // beginCmd represents the begin command
 var beginCmd = &cobra.Command{
 	Use:   "begin",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Start a new coding quest",
+	Long: `Start a new coding quest with three options:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+1. Pick a Legendary Path - Choose from curated templates (REST APIs, CLI tools, concurrency, etc.)
+2. Forge Your Own Quest - Customize and generate a quest with AI assistance
+3. Seek a Mystery Quest - Get a surprise AI-generated quest
+
+Each quest contains chapters with tasks, automated validation, and AI-powered hints.`,
 	Run: quest.RunBegin,
 }
 

@@ -622,6 +622,104 @@ func RunSummary(cmd *cobra.Command, args []string) {
 	printSummary(*plan, *state)
 }
 
+func RunHealthCheck(cmd *cobra.Command, args []string) {
+	format.Header("Quest Health Check")
+	format.Newline()
+
+	allHealthy := true
+
+	// Check .quest folder
+	questFolder, err := checkExistenceOfFile(QuestFolderName)
+	if questFolder {
+		format.CheckPass(".quest folder", "exists")
+	} else {
+		format.CheckFail(".quest folder", "not found - run 'quest begin' to start")
+		allHealthy = false
+	}
+
+	// Check plan file
+	planFile, err := checkExistenceOfFile(PlanFilePath)
+	if planFile {
+		format.CheckPass("plan.json", "exists")
+	} else {
+		format.CheckFail("plan.json", "not found")
+		allHealthy = false
+	}
+
+	// Check state file
+	stateFile, err := checkExistenceOfFile(StateFilePath)
+	if stateFile {
+		format.CheckPass("state.json", "exists")
+	} else {
+		format.CheckFail("state.json", "not found")
+		allHealthy = false
+	}
+
+	// Check if plan can be loaded
+	plan, err := LoadPlan()
+	planLoad := plan != nil
+	if err != nil {
+		format.CheckFail("plan loading", fmt.Sprintf("failed to load: %s", err.Error()))
+		allHealthy = false
+	} else if planLoad {
+		format.CheckPass("plan loading", fmt.Sprintf("loaded successfully (%d tasks)", plan.NumberOfTasks))
+	} else {
+		format.CheckFail("plan loading", "plan is nil")
+		allHealthy = false
+	}
+
+	// Check if state can be loaded
+	state, err := LoadState()
+	stateLoad := state != nil
+	if err != nil {
+		format.CheckFail("state loading", fmt.Sprintf("failed to load: %s", err.Error()))
+		allHealthy = false
+	} else if stateLoad {
+		format.CheckPass("state loading", fmt.Sprintf("loaded successfully (task %d/%d)", state.CurrentTaskIndex+1, plan.NumberOfTasks))
+	} else {
+		format.CheckFail("state loading", "state is nil")
+		allHealthy = false
+	}
+
+	format.Newline()
+	format.Divider()
+	format.Newline()
+
+	// Warning checks (non-critical)
+	format.Bold("Environment Checks:")
+	format.Newline()
+
+	// Check if in a git repository
+	_, err = os.Stat(".git")
+	if err != nil {
+		format.Warning("⚠ Not in a git repository - version control recommended")
+	} else {
+		format.Info("✓ Git repository detected")
+	}
+
+	// Check if GitHub Copilot CLI is available
+	_, err = os.Stat(os.ExpandEnv("$HOME/.copilot"))
+	if err != nil {
+		// Try alternative check via command
+		format.Warning("⚠ GitHub Copilot CLI not detected - enhanced features may be limited")
+	} else {
+		format.Info("✓ GitHub Copilot CLI detected")
+	}
+
+	format.Newline()
+	format.Divider()
+	format.Newline()
+
+	// Final summary
+	if allHealthy {
+		format.Success("🎉 All health checks passed!")
+		format.CommandHint("Continue your quest with", "quest next")
+	} else {
+		format.Error("❌ Some health checks failed", nil)
+		format.CommandHint("Try running", "quest begin")
+	}
+}
+
 func printSummary(plan types.Plan, state types.State) {
 	ifCompleted := ifCompletedPlan(plan, state)
 	currentChapter := currentChapter(state.CurrentTaskIndex, plan)
