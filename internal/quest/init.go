@@ -200,7 +200,7 @@ func RunNext(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	if state.LastCheck != nil || state.LastCheck.Status != types.CheckPass {
+	if state.LastCheck == nil || state.LastCheck.Status != types.CheckPass {
 		format.Warning("The previous check didn't pass.")
 		format.Print("Are you sure you want to continue without passing the check? (y/N): ")
 		var response string
