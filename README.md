@@ -162,6 +162,10 @@ go build -o quest
 ```bash
 # To run in the repo itself, use ./ before quest to run the executable
 ./quest begin
+
+# To update the repo to the newest version
+git pull origin main
+go build -o quest
 ```
 
 ### Option 3: Download Pre-built Binaries

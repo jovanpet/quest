@@ -598,6 +598,7 @@ func RunJumpTo(cmd *cobra.Command, args []string) {
 
 	// Update state
 	state.CurrentTaskIndex = taskIndex
+	state.ExplainCount = 0
 
 	// Save state
 	err = UploadState(state)
@@ -900,6 +901,10 @@ func runExplain() error {
 	state, err := LoadState()
 	if err != nil {
 		return fmt.Errorf("failed to load state: %w", err)
+	}
+
+	if state.ExplainCount > 3 {
+		return fmt.Errorf("explain limit reached for this task")
 	}
 
 	// Load plan
