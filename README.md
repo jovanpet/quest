@@ -2,6 +2,15 @@
 
 An interactive CLI tool for learning Go through hands-on coding quests with AI-powered hints.
 
+## Backstory
+I used to work in big tech, and last summer I decided to venture on a journey of personal projects alongside my day job. There are just way too many cool ideas floating around. AI has made it easier than ever to fill in the gaps when things aren't working. In my opinion, AI is great at small, distinct tasks, but not very good at handling large repos.
+
+On my first project, I had no issue setting it up and developing a few endpoints. However, the issues became apparent when my token usage skyrocketed mid-project. The codebase wasn't well organized, and I didn't have time to refactor it while enabling new features. So I scrapped it.
+
+I decided to make my own server setup and used AI liberally for small tasks—refactoring, running tests, implementing boilerplate code with references. But there was a new problem: I'd never built a server from zero to one. Even in college, you get boilerplate. I knew the theory, but I hadn't really implemented it myself. A simple server is easy to set up, but I prefer my code organized for 100 endpoints, even though I only need 10. So I spent 3-4 days researching on Medium, Golang docs, and ChatGPT—3-4 days of not building anything, just cruising the internet on my commute.
+
+I wished there was a way to just work on a project in VS Code and learn along the way. Well, now there is. Quest lets you learn by doing—right in your CLI, on your own terms. No books, no websites, no endless tutorials. Just hands-on coding with AI-powered hints that guide you forward.
+
 ## Quick Start
 
 ```bash
@@ -67,15 +76,6 @@ Checks the health of the quest.
 4. **Check** - Validate your code automatically
 5. **Explain** - Get AI help if stuck
 6. **Complete** - Move to the next challenge
-
-### Backstory
-I used to work in big tech, and last summer I decided to venture on a journey of personal projects alongside my day job. There are just way too many cool ideas floating around. AI has made it easier than ever to fill in the gaps when things aren't working. In my opinion, AI is great at small, distinct tasks, but not very good at handling large repos.
-
-On my first project, I had no issue setting it up and developing a few endpoints. However, the issues became apparent when my token usage skyrocketed mid-project. The codebase wasn't well organized, and I didn't have time to refactor it while enabling new features. So I scrapped it.
-
-I decided to make my own server setup and used AI liberally for small tasks—refactoring, running tests, implementing boilerplate code with references. But there was a new problem: I'd never built a server from zero to one. Even in college, you get boilerplate. I knew the theory, but I hadn't really implemented it myself. A simple server is easy to set up, but I prefer my code organized for 100 endpoints, even though I only need 10. So I spent 3-4 days researching on Medium, Golang docs, and ChatGPT—3-4 days of not building anything, just cruising the internet on my commute.
-
-I wished there was a way to just work on a project in VS Code and learn along the way. Well, now there is. Quest lets you learn by doing—right in your CLI, on your own terms. No books, no websites, no endless tutorials. Just hands-on coding with AI-powered hints that guide you forward.
 
 ## Example Usage
 
