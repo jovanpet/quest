@@ -218,6 +218,10 @@ func RunNext(cmd *cobra.Command, args []string) {
 		state.ExplainCount = 0
 	} else {
 		state.QuestStarted = true
+		state.LastCheck = &types.CheckResult{
+			Status:    types.CheckFail,
+			Timestamp: time.Now(),
+		}
 	}
 
 	// Check bounds after increment
