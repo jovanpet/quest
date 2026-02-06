@@ -162,8 +162,11 @@ func runBegin() error {
 		Version:          1,
 		CurrentTaskIndex: 0,
 		CompletedTaskIDs: []string{},
-		LastCheck:        nil,
-		QuestStarted:     false,
+		LastCheck: &types.CheckResult{
+			Status:    types.CheckFail,
+			Timestamp: time.Now(),
+		},
+		QuestStarted: false,
 	}
 
 	err = UploadStateAndPlan(firstState, plan)
@@ -200,14 +203,7 @@ func RunNext(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	if state.LastCheck == nil {
-		state.LastCheck = &types.CheckResult{
-			Status:    types.CheckFail,
-			Timestamp: time.Now(),
-		}
-	}
-
-	if state.LastCheck != nil && state.LastCheck.Status != types.CheckPass {
+	if state.QuestStarted && state.LastCheck != nil && state.LastCheck.Status != types.CheckPass {
 		format.Warning("The previous check didn't pass or didn't happen.")
 		format.Print("Are you sure you want to continue without passing the check? (y/N): ")
 		var response string
@@ -221,7 +217,6 @@ func RunNext(cmd *cobra.Command, args []string) {
 
 	if state.QuestStarted {
 		state.CurrentTaskIndex++
-		// Reset explain count when moving to new task
 		state.ExplainCount = 0
 	} else {
 		state.QuestStarted = true
@@ -244,7 +239,10 @@ func RunNext(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	state.LastCheck = nil
+	state.LastCheck = &types.CheckResult{
+		Status:    types.CheckFail,
+		Timestamp: time.Now(),
+	}
 	err = UploadState(state)
 	if err != nil {
 		format.ErrorWithTip("Failed to save state", err, "Check folder permissions")
