@@ -200,6 +200,13 @@ func RunNext(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	if state.LastCheck == nil {
+		state.LastCheck = &types.CheckResult{
+			Status:    types.CheckFail,
+			Timestamp: time.Now(),
+		}
+	}
+
 	if state.LastCheck != nil && state.LastCheck.Status != types.CheckPass {
 		format.Warning("The previous check didn't pass or didn't happen.")
 		format.Print("Are you sure you want to continue without passing the check? (y/N): ")
@@ -218,10 +225,6 @@ func RunNext(cmd *cobra.Command, args []string) {
 		state.ExplainCount = 0
 	} else {
 		state.QuestStarted = true
-		state.LastCheck = &types.CheckResult{
-			Status:    types.CheckFail,
-			Timestamp: time.Now(),
-		}
 	}
 
 	// Check bounds after increment
@@ -758,7 +761,7 @@ func printSummary(plan types.Plan, state types.State) {
 		allTasks := FlattenTasks(&plan)
 		currentTask := allTasks[state.CurrentTaskIndex]
 		chapter := plan.Chapters[currentChapter]
-		quest := chapter.Quests[currentQuest]
+		quest := chapter.Quests[currentQuest-1]
 
 		// Show all chapters with status (if multiple chapters)
 		if len(plan.Chapters) > 1 {
